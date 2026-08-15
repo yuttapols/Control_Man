@@ -1,0 +1,36 @@
+@import 'tailwindcss';
+@import 'primeicons/primeicons.css';
+@plugin 'tailwindcss-primeui';
+
+@theme {
+  --font-sans:
+    'IBM Plex Sans Thai', 'Noto Sans Thai', 'Sarabun', system-ui, -apple-system, 'Segoe UI',
+    sans-serif;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--p-surface-800);
+  background-color: var(--p-surface-50);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--p-primary-500);
+  outline-offset: 2px;
+}
+
+.p-inputtext,
+.p-password-input,
+.p-select,
+.p-multiselect,
+.p-datepicker-input {
+  min-height: 2.5rem;
+}
