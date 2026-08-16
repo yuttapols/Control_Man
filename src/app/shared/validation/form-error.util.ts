@@ -1,17 +1,20 @@
 import { AbstractControl, FormGroup } from '@angular/forms';
 
+import { TranslationKey } from '../../core/i18n/locales/th';
 import { FieldError, ProblemDetail } from '../models/api.model';
-import { validationMessage } from './validation-messages';
+import { ValidationMessage, validationMessage } from './validation-messages';
 
 export const SERVER_ERROR_KEY = 'serverError';
 
 export interface FormErrorItem {
   field: string;
-  label: string;
-  message: string;
+  labelKey: TranslationKey | null;
+  message: ValidationMessage;
 }
 
-export function controlErrorText(control: AbstractControl | null | undefined): string | null {
+export function controlErrorMessage(
+  control: AbstractControl | null | undefined,
+): ValidationMessage | null {
   if (!control || !control.errors || !isControlVisible(control)) {
     return null;
   }
@@ -38,15 +41,15 @@ export function markAllControlsTouched(form: FormGroup): void {
 
 export function formErrorSummary(
   form: FormGroup,
-  labels: Readonly<Record<string, string>> = {},
+  labelKeys: Readonly<Record<string, TranslationKey>> = {},
 ): FormErrorItem[] {
   const summary: FormErrorItem[] = [];
 
   for (const [field, control] of Object.entries(form.controls)) {
-    const message = controlErrorText(control);
+    const message = controlErrorMessage(control);
 
     if (message) {
-      summary.push({ field, label: labels[field] ?? field, message });
+      summary.push({ field, labelKey: labelKeys[field] ?? null, message });
     }
   }
 

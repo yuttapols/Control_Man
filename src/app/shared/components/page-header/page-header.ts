@@ -4,9 +4,11 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   selector: 'app-page-header',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="flex flex-wrap items-start justify-between gap-3 border-b border-surface-200 pb-4">
-      <div class="flex flex-col gap-1">
-        <h1 class="text-xl font-semibold text-surface-900">{{ title() }}</h1>
+    <div
+      class="flex flex-col gap-3 border-b border-surface-200 pb-4 sm:flex-row sm:items-start sm:justify-between"
+    >
+      <div class="flex min-w-0 flex-col gap-1">
+        <h1 class="text-xl font-bold text-surface-900 sm:text-2xl">{{ title() }}</h1>
         @if (description()) {
           <p class="text-sm text-surface-500">{{ description() }}</p>
         }

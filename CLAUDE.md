@@ -60,6 +60,8 @@ npm run lint       # eslint
 
 ## 3. Coding Rules (ผู้ใช้กำหนดชัดเจน)
 
+0. **ห้าม hard-code ข้อความที่ผู้ใช้เห็นทุกชนิด** ต้องผ่าน `i18n.t('key')` และเพิ่ม key ครบ **ทั้ง 3 ภาษา**
+   (ไทย/อังกฤษ/จีนตัวย่อ) เสมอ — ดูรายละเอียดที่ §14
 1. **ห้ามเขียน comment ใน code** ทุกไฟล์ — ตั้งชื่อให้อ่านรู้เรื่องแทน
    ข้อยกเว้นเดียว: `TODO(contract):` เมื่อรอ API contract จริง
 2. **อะไรที่ซ้ำ ต้องดึงเป็น function กลาง** ห้าม copy-paste logic ข้าม component/service
@@ -85,7 +87,9 @@ src/app/
     api/api.service.ts            HTTP wrapper + แกะ data/meta + toHttpParams
     auth/                         auth.model, auth.store, auth.service, permission.service, auth.guard
     config/                       app-config.model, app-config.service (โหลด config.json ตอน bootstrap)
-    error/                        problem-detail.ts, app-error-handler.ts
+    error/                        problem-detail.ts (คืน translation key), app-error-handler.ts
+    i18n/                         i18n.service, language.model, app-title.strategy, locales/{th,en,zh}.ts
+    theme/app-preset.ts           PrimeNG preset โทนเขียว-ขาว
     http/                         correlation / error / auth interceptors
     mock/                         mock-accounts.ts, mock-api.interceptor.ts
     notification/                 notification.service.ts (ครอบ PrimeNG MessageService)
@@ -100,7 +104,8 @@ src/app/
     auth/login-page.ts
     dashboard/dashboard-page.ts
     error/forbidden-page.ts | not-found-page.ts | server-error-page.ts
-  layout/                         app-shell, topbar, sidebar, breadcrumb, nav.config.ts
+  layout/                         app-shell, topbar, sidebar, brand, user-menu,
+                                  language-switcher, breadcrumb, layout.store.ts, nav.config.ts
 ```
 
 กติกา:
@@ -193,6 +198,41 @@ Permission code อยู่ที่ `shared/constants/permission.constant.ts` 
 - Template ใช้ `*appHasPermission="'code'"` หรือ array ห้ามเช็ค role string ตรง ๆ
 - **Guard/การซ่อนเมนูคือ UX ไม่ใช่ security** — Backend เป็นตัวบังคับจริง (BR-SEC-002)
 
+### Contract จริงของ BE1 (`C:\GIT\BACK-END\Control_Man_Backend`)
+
+**อ่าน `docs/API-EXAMPLES.md` ของ repo BE ก่อนต่อ endpoint ใหม่ทุกครั้ง** (มีตัวอย่าง JSON จริง
++ ตาราง error code → status) และดูสดได้ที่ Swagger `http://localhost:8080/swagger-ui.html`
+
+BE1 เสร็จแล้ว (70 tests PASS) มี 4 endpoints: `POST /auth/login`, `POST /auth/refresh`,
+`POST /auth/logout`, `GET /auth/me` ที่ `http://localhost:8080/api/v1/portal`
+บัญชีทดสอบ local ตามเอกสาร BE: `admin` / `Admin@1234`
+
+- `AuthResponse` = `{ accessToken, tokenType: "Bearer", expiresIn, user }`
+- `UserResponse` = `{ id, username, displayName, permissions[] }` — ยังไม่มี roles/status/email
+  (FE ทำ field เหล่านั้นเป็น optional ไว้แล้ว)
+- `AuthResponse` มี `csrfToken` ใน body → FE เก็บใน memory ไม่ต้องอ่าน cookie
+- JWT claims = `iss, sub, aud, iat, exp, jti, sid, authVersion` (ไม่มี permission ใน token
+  BE โหลดจาก DB ต่อ request ผ่าน `PortalAuthorizationFilter`)
+- Error = RFC7807 + `code`, `requestId`, `errors[]` → ตรงกับ `ProblemDetail` ของ FE
+- **ผูกข้อความ error กับ `code` เท่านั้น ห้ามผูกกับ HTTP status หรือข้อความจาก BE**
+  (`detail`/`title` ของ BE เป็นภาษาอังกฤษ ห้ามโชว์ผู้ใช้) ข้อความไทยอยู่ใน `CODE_MESSAGES`
+  ที่ `core/error/problem-detail.ts` — เพิ่ม error code ใหม่ต้องเพิ่มข้อความที่นี่
+  ยกเว้น `BUSINESS_RULE_VIOLATION` ที่ใช้ `detail` เพราะเป็นตัวบอกเหตุผลจริงของกฎที่ผิด
+- `PageMeta.number` (ไม่ใช่ `page`)
+- CORS allowlist = `http://localhost:4200` เท่านั้น → **dev server ต้องรันพอร์ต 4200**
+- **CORS `allowedHeaders` = `Authorization, Content-Type, X-Request-ID, X-CSRF-Token` เท่านั้น**
+  ห้าม FE ส่ง custom header อื่นเด็ดขาด preflight จะตกและเบราว์เซอร์บล็อกทั้ง request
+  (เคยพลาดมาแล้วด้วย `X-Correlation-Id` ทำให้ login ไม่ผ่าน) ถ้าต้องเพิ่ม header ใหม่
+  ต้องให้ BE เพิ่มใน `AuthApiConfig.corsConfigurationSource` ก่อนเสมอ
+- Request id ใช้ชื่อ `X-Request-Id` และค่าต้องตรง `^[A-Za-z0-9_.:-]{1,64}$` (BE จะทิ้งค่าที่ไม่ตรง
+  แล้วสร้างใหม่) BE ส่งกลับใน response header เดียวกันและ expose ให้ JS อ่านได้
+- `/auth/refresh` และ `/auth/logout` ต้องผ่าน CSRF double-submit:
+  header `X-CSRF-Token` ต้องตรงกับ cookie `control_m_csrf` และ `Origin` ต้องอยู่ใน allowlist
+- Cookie: `control_m_refresh` (HttpOnly) + `control_m_csrf` (อ่านได้) path `/api/v1/portal/auth`
+
+FE ส่ง `X-CSRF-Token` ให้แล้วผ่าน `core/auth/csrf.ts` โดยอ่านจาก `AuthStore.csrfToken()`
+(ถ้า BE ใส่ `csrfToken` มาใน response) แล้ว fallback ไปอ่าน cookie
+
 ### Runtime config (FE1-03)
 
 `public/config/config.json` โหลดตอน `provideAppInitializer` ก่อน bootstrap → เปลี่ยน API origin/Environment
@@ -249,7 +289,8 @@ Permission code อยู่ที่ `shared/constants/permission.constant.ts` 
 - Calendar: Government=blue, Bank=red, Both=purple, Substitute=`◇`
 - **ห้ามสื่อสถานะด้วยสีอย่างเดียว** ต้องมีข้อความหรือ icon เสมอ
 - Environment badge: DEV ฟ้า / UAT เหลืองอำพัน / PROD แดงเข้ม (component `EnvironmentBadge`)
-- Spacing 4px scale, sidebar `w-64` (256px), form control สูง ≥40px, body text 15px, `lang="th"`
+- Spacing 4px scale, sidebar `w-64` (256px) / rail `w-18` (72px), form control สูง ≥40px, body text 15px
+- `<html lang>` ถูกตั้งโดย `I18nService` ตามภาษาที่เลือก **ห้าม hard-code ใน `index.html`**
 
 ### Accessibility (เป้า WCAG 2.1 AA)
 
@@ -264,7 +305,10 @@ keyboard ครบทุก flow · focus indicator ชัด (`:focus-visible` 
 | ที่อยู่ | หน้าที่ | สถานะ |
 |---|---|---|
 | `core/api/api.service.ts` | CRUD + แกะ data/meta + `toHttpParams` (ตัดค่าว่างอัตโนมัติ) | ✅ |
-| `core/error/problem-detail.ts` | normalize error ทุกชนิด → `ProblemDetail`, ข้อความไทยตาม status | ✅ |
+| `core/error/problem-detail.ts` | normalize error → `ProblemDetail` + แปลง code/status → **translation key** | ✅ |
+| `core/i18n/i18n.service.ts` | `t()`, `language()`, `locale()`, `setLanguage()`, `problemMessage/Title()` | ✅ |
+| `layout/layout.store.ts` | สถานะ sidebar (drawer/rail/expanded) + จำค่าที่ผู้ใช้เลือก | ✅ |
+| `core/utils/media-query.util.ts` | `mediaQuerySignal()` แปลง breakpoint เป็น signal | ✅ |
 | `core/http/*.interceptor.ts` | correlation id, error → toast/normalize, bearer + single-flight refresh | ✅ |
 | `core/notification/notification.service.ts` | success/info/warn/error/problem | ✅ |
 | `core/utils/url.util.ts` | return URL, trusted API URL, safe external URL, join | ✅ |
@@ -308,8 +352,14 @@ FE2+ ค่อยเพิ่ม `/holidays`, `/holidays/calendar`, `/approvals`
 | FE3 | Approval inbox, revision compare, L1/L2 actions, SoD UX, timeline, emergency, post-review | `NOT_STARTED` |
 | FE4 | API consumer/credential, user/role, audit, settings, production hardening, regression | `NOT_STARTED` |
 
-ค้างจาก FE1 (ต้องทำตอน BE1 พร้อม): ยืนยัน permission code จริง, endpoint/error contract จริง,
-ปิด `useMockApi`, ทดสอบ integration login→refresh→logout กับ BE จริง, E2E ยังไม่มี (FE2 ค่อยเลือก tool)
+ค้างจาก FE1:
+
+1. ยืนยันชุด permission code จริงที่ BE ส่งมาใน `user.permissions` เทียบกับ
+   `shared/constants/permission.constant.ts` (ถ้าไม่ตรง เมนูจะไม่ขึ้นแม้ล็อกอินผ่าน)
+2. `roles` ยังไม่มีใน response → topbar แสดง "ไม่มีบทบาท" จนกว่า BE จะเพิ่ม
+3. E2E ยังไม่มี (FE2 ค่อยเลือก tool)
+
+BE แก้ให้แล้ว: `csrfToken` ใน response body และ `permissions[]` ใน user
 
 ---
 
@@ -322,6 +372,7 @@ FE2+ ค่อยเพิ่ม `/holidays`, `/holidays/calendar`, `/approvals`
 - ถือว่า guard/การซ่อนเมนู = security
 - ทำ Import/Export หรือ upload ไฟล์ประกาศ (นอก MVP)
 - ขยาย scope ข้าม phase โดยไม่ถามผู้ใช้ก่อน (`AGENTS.md`: เสนอ → รออนุมัติ → ทำ)
+- **hard-code ข้อความที่ผู้ใช้เห็น** หรือเพิ่ม key แล้วแปลไม่ครบ 3 ภาษา (§14)
 
 ---
 
@@ -331,3 +382,67 @@ FE2+ ค่อยเพิ่ม `/holidays`, `/holidays/calendar`, `/approvals`
 ทุกครั้งที่จบงาน ต้อง `npm run lint` + `npm test` + `npm run build` ให้ผ่านก่อนรายงาน
 ถ้ามี decision ใหม่ที่กระทบการออกแบบ ให้เตือนผู้ใช้ว่าควรอัปเดต `docs/CONTEXT-SUMMARY.md`
 และ `docs/DECISION-LOG.md` ใน repo เอกสาร
+
+---
+
+## 14. Multi-language (i18n) — อ่านก่อนเขียนงานใหม่ทุกครั้ง
+
+ระบบรองรับ **3 ภาษา: ไทย (`th`, ค่าเริ่มต้น) / อังกฤษ (`en`) / จีนตัวย่อ (`zh`, 简体中文)**
+สลับได้ตอน runtime จากปุ่มมุมขวาบน จำค่าไว้ใน `localStorage` (`thc.language`)
+
+### กฎเหล็ก
+
+> **ทุกครั้งที่เพิ่มข้อความใหม่ที่ผู้ใช้มองเห็น ต้องเพิ่ม key ครบทั้ง 3 ไฟล์ภาษา**
+> ห้ามเขียนข้อความไทย (หรือภาษาใด ๆ) ลงใน component, service, config หรือ template โดยตรง
+
+### ขั้นตอนเพิ่มข้อความใหม่
+
+1. เพิ่ม key + ข้อความไทยใน `core/i18n/locales/th.ts` — ไฟล์นี้คือ **source of truth**
+   ที่กำหนด type `TranslationKey`
+2. เพิ่ม key เดียวกันใน `core/i18n/locales/en.ts` และ `core/i18n/locales/zh.ts`
+3. เรียกใช้ใน component ด้วย `protected readonly i18n = inject(I18nService);`
+   แล้วใน template ใช้ `{{ i18n.t('your.key') }}` หรือ `[label]="i18n.t('your.key')"`
+
+**ถ้าลืมข้อ 2 `npm run build` จะพังทันที** เพราะ `en.ts`/`zh.ts` ประกาศเป็น
+`Readonly<Record<TranslationKey, string>>` — TypeScript บังคับให้มี key ครบ ไม่ใช่แค่เตือนตอน runtime
+มี unit test คุมซ้ำอีกชั้นที่ `core/i18n/i18n.service.spec.ts` (key ครบ, ไม่มีค่าว่าง, placeholder ตรงกัน)
+
+### รูปแบบการตั้งชื่อ key
+
+`<area>.<name>` เช่น `nav.dashboard`, `login.submit`, `pageState.emptyTitle`, `error.message.notFound`
+area ที่มีแล้ว: `nav` `layout` `user` `env` `login` `dashboard` `pageState` `form` `validation`
+`notify` `error` `app` `page` `route`
+
+### Interpolation
+
+ใช้ `{name}` ในข้อความ แล้วส่ง param เข้าไป — **placeholder ต้องเหมือนกันทั้ง 3 ภาษา** (มี test คุม)
+
+```ts
+'dashboard.greeting': 'ยินดีต้อนรับ {name}'
+i18n.t('dashboard.greeting', { name: displayName() })
+```
+
+### จุดที่ไม่ใช่ template แต่ต้องแปลด้วย
+
+| ที่ | ทำยังไง |
+|---|---|
+| เมนู sidebar | `nav.config.ts` เก็บ `labelKey`/`titleKey` ไม่ใช่ข้อความ |
+| Route title + breadcrumb | `app.routes.ts` ใส่ key ลง `title` และ `data.breadcrumb` แล้ว `AppTitleStrategy` แปลให้ |
+| Error จาก API | `problem-detail.ts` แปลง `code`/status → key เพิ่ม error code ใหม่ต้องเพิ่ม `error.message.*` + `error.title.*` |
+| Validator ใหม่ | `validation-messages.ts` คืน `{ key, params }` ต้องเพิ่ม `validation.*` ครบ 3 ภาษา |
+| Enum / status label | ต้องเป็น map `<Enum> → TranslationKey` ห้าม map ไปข้อความตรง ๆ (สำคัญมากตอน FE2 ทำ `status.constant.ts`) |
+
+### สิ่งที่ **ไม่** ต้องแปล
+
+ชื่อภาษาในตัวเลือก (ไทย/English/简体中文 แสดงเป็นภาษาตัวเอง) · `mock-accounts.ts` (mock data)
+· ชื่อ Environment (DEV/UAT/PROD) · ข้อความ log/console
+
+### ข้อจำกัดที่ยังค้าง
+
+- **ข้อความจาก Backend** เป็นภาษาอังกฤษเสมอ FE แปลได้เฉพาะที่ผูกกับ `code`
+  ส่วน `BUSINESS_RULE_VIOLATION` ใช้ `detail` ดิบจาก BE — ถ้าต้องการแปล ต้องให้ BE แตก code ให้ละเอียดขึ้น
+- **ไม่ได้ผูก Angular `LOCALE_ID`** เพราะ `LOCALE_ID` inject ครั้งเดียวตอน bootstrap
+  ถ้าผูกไว้จะค้างภาษาเดิมหลังผู้ใช้สลับภาษา (ต้อง reload ถึงจะเปลี่ยน)
+  → FE2 ตอนทำ `core/utils/date.util.ts` ให้ format ด้วย `i18n.locale()` ซึ่งเป็น signal
+  จะได้อัปเดตตามภาษาทันที **ห้ามใช้ `DatePipe`/`DecimalPipe` เปล่า ๆ กับข้อมูลที่ต้องเปลี่ยนตามภาษา**
+- ปี พ.ศ. ยังใช้ตามกฎเดิม (BR-HOL-010) แสดงเฉพาะตอนภาษาไทย

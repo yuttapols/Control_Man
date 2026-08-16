@@ -12,7 +12,7 @@ export const routes: Routes = [
   {
     path: 'login',
     canActivate: [guestGuard],
-    title: 'เข้าสู่ระบบ',
+    title: 'route.login',
     loadComponent: () => import('./features/auth/login-page').then((m) => m.LoginPage),
   },
   {
@@ -22,28 +22,28 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
-        title: 'ภาพรวม',
-        data: { breadcrumb: 'ภาพรวม' },
+        title: 'route.dashboard',
+        data: { breadcrumb: 'route.dashboard' },
         loadComponent: () =>
           import('./features/dashboard/dashboard-page').then((m) => m.DashboardPage),
       },
       {
         path: '403',
-        title: 'ไม่มีสิทธิ์เข้าถึง',
-        data: { breadcrumb: 'ไม่มีสิทธิ์เข้าถึง' },
+        title: 'route.forbidden',
+        data: { breadcrumb: 'route.forbidden' },
         loadComponent: () => import('./features/error/forbidden-page').then((m) => m.ForbiddenPage),
       },
       {
         path: 'error',
-        title: 'ระบบขัดข้อง',
-        data: { breadcrumb: 'ระบบขัดข้อง' },
+        title: 'route.serverError',
+        data: { breadcrumb: 'route.serverError' },
         loadComponent: () =>
           import('./features/error/server-error-page').then((m) => m.ServerErrorPage),
       },
       {
         path: '**',
-        title: 'ไม่พบหน้าที่ต้องการ',
-        data: { breadcrumb: 'ไม่พบหน้าที่ต้องการ' },
+        title: 'route.notFound',
+        data: { breadcrumb: 'route.notFound' },
         loadComponent: () => import('./features/error/not-found-page').then((m) => m.NotFoundPage),
       },
     ],

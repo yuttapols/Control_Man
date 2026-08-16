@@ -1,4 +1,13 @@
-export type ValidationMessageFactory = (error: unknown) => string;
+import { TranslationKey } from '../../core/i18n/locales/th';
+import { TranslationParams } from '../../core/i18n/i18n.service';
+
+export interface ValidationMessage {
+  key: TranslationKey;
+  params?: TranslationParams;
+  text?: string;
+}
+
+type ValidationMessageFactory = (error: unknown) => ValidationMessage;
 
 interface LengthError {
   requiredLength: number;
@@ -15,28 +24,34 @@ interface ServerError {
 
 const lengthOf = (error: unknown): number => (error as LengthError).requiredLength;
 
+export const FALLBACK_VALIDATION_KEY: TranslationKey = 'validation.fallback';
+
 export const VALIDATION_MESSAGES: Readonly<Record<string, ValidationMessageFactory>> = {
-  required: () => 'กรุณากรอกข้อมูลนี้',
-  requiredTrue: () => 'กรุณายืนยันรายการนี้ก่อนดำเนินการต่อ',
-  notBlank: () => 'ห้ามกรอกเฉพาะช่องว่าง',
-  email: () => 'รูปแบบอีเมลไม่ถูกต้อง',
-  username: () => 'ใช้ได้เฉพาะตัวอักษร ตัวเลข และ . _ - @ ความยาว 3-100 ตัวอักษร',
-  minlength: (error) => `ต้องมีอย่างน้อย ${lengthOf(error)} ตัวอักษร`,
-  maxlength: (error) => `ต้องไม่เกิน ${lengthOf(error)} ตัวอักษร`,
-  maxTrimmedLength: (error) => `ต้องไม่เกิน ${lengthOf(error)} ตัวอักษร`,
-  min: (error) => `ต้องไม่น้อยกว่า ${(error as RangeError).min}`,
-  max: (error) => `ต้องไม่มากกว่า ${(error as RangeError).max}`,
-  pattern: () => 'รูปแบบข้อมูลไม่ถูกต้อง',
-  isoDate: () => 'รูปแบบวันที่ต้องเป็น ปปปป-ดด-วว',
-  httpUrl: () => 'ต้องเป็น URL ที่ขึ้นต้นด้วย http:// หรือ https://',
-  match: () => 'ค่าที่กรอกไม่ตรงกัน',
-  serverError: (error) => (error as ServerError).message,
+  required: () => ({ key: 'validation.required' }),
+  requiredTrue: () => ({ key: 'validation.requiredTrue' }),
+  notBlank: () => ({ key: 'validation.notBlank' }),
+  email: () => ({ key: 'validation.email' }),
+  username: () => ({ key: 'validation.username' }),
+  minlength: (error) => ({ key: 'validation.minlength', params: { length: lengthOf(error) } }),
+  maxlength: (error) => ({ key: 'validation.maxlength', params: { length: lengthOf(error) } }),
+  maxTrimmedLength: (error) => ({
+    key: 'validation.maxlength',
+    params: { length: lengthOf(error) },
+  }),
+  min: (error) => ({ key: 'validation.min', params: { min: (error as RangeError).min ?? 0 } }),
+  max: (error) => ({ key: 'validation.max', params: { max: (error as RangeError).max ?? 0 } }),
+  pattern: () => ({ key: 'validation.pattern' }),
+  isoDate: () => ({ key: 'validation.isoDate' }),
+  httpUrl: () => ({ key: 'validation.httpUrl' }),
+  match: () => ({ key: 'validation.match' }),
+  serverError: (error) => ({
+    key: FALLBACK_VALIDATION_KEY,
+    text: (error as ServerError).message,
+  }),
 };
 
-export const FALLBACK_VALIDATION_MESSAGE = 'ข้อมูลไม่ถูกต้อง';
-
-export function validationMessage(key: string, error: unknown): string {
+export function validationMessage(key: string, error: unknown): ValidationMessage {
   const factory = VALIDATION_MESSAGES[key];
 
-  return factory ? factory(error) : FALLBACK_VALIDATION_MESSAGE;
+  return factory ? factory(error) : { key: FALLBACK_VALIDATION_KEY };
 }

@@ -1,96 +1,89 @@
-import { ChangeDetectionStrategy, Component, computed, inject, output } from '@angular/core';
-import { MenuItem } from 'primeng/api';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { Button } from 'primeng/button';
-import { Menu } from 'primeng/menu';
 import { Tooltip } from 'primeng/tooltip';
 
-import { AuthService } from '../../core/auth/auth.service';
-import { AuthStore } from '../../core/auth/auth.store';
 import { AppConfigService } from '../../core/config/app-config.service';
+import { I18nService } from '../../core/i18n/i18n.service';
 import { EnvironmentBadge } from '../../shared/components/environment-badge/environment-badge';
+import { LanguageSwitcher } from '../language-switcher/language-switcher';
+import { LayoutStore } from '../layout.store';
 
 @Component({
   selector: 'app-topbar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Button, Menu, Tooltip, EnvironmentBadge],
+  imports: [Button, Tooltip, EnvironmentBadge, LanguageSwitcher],
   template: `
     <header
-      class="flex h-16 items-center justify-between gap-3 border-b border-surface-200 bg-white px-4"
+      class="sticky top-0 z-30 flex h-16 items-center justify-between gap-2 border-b border-surface-200 bg-white/90 px-3 backdrop-blur sm:px-4"
     >
-      <div class="flex items-center gap-3">
+      <div class="flex min-w-0 items-center gap-2">
         <p-button
-          icon="pi pi-bars"
+          [icon]="toggleIcon()"
           severity="secondary"
           [text]="true"
-          styleClass="lg:hidden"
-          ariaLabel="เปิดหรือปิดเมนูหลัก"
-          (onClick)="toggleSidebar.emit()"
+          [rounded]="true"
+          [ariaLabel]="toggleLabel()"
+          [attr.aria-expanded]="sidebarExpanded()"
+          [pTooltip]="toggleLabel()"
+          tooltipPosition="bottom"
+          (onClick)="toggleSidebar()"
         />
-        <span class="text-base font-semibold text-surface-900">{{ appName() }}</span>
-        <app-environment-badge />
+
+        <span class="truncate text-base font-bold text-surface-900 lg:hidden">
+          {{ appName() }}
+        </span>
+
+        <span class="hidden lg:inline">
+          <app-environment-badge />
+        </span>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex shrink-0 items-center gap-1 sm:gap-2">
+        <span class="lg:hidden">
+          <app-environment-badge [compact]="true" />
+        </span>
+
+        <app-language-switcher />
+
         <p-button
           icon="pi pi-bell"
           severity="secondary"
           [text]="true"
+          [rounded]="true"
           [disabled]="true"
-          ariaLabel="การแจ้งเตือน"
-          pTooltip="การแจ้งเตือนจะเปิดใช้งานในเฟสถัดไป"
+          [ariaLabel]="i18n.t('layout.notifications')"
+          [pTooltip]="i18n.t('layout.notificationsTooltip')"
           tooltipPosition="bottom"
         />
-
-        <button
-          type="button"
-          class="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-surface-700 hover:bg-surface-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
-          aria-haspopup="true"
-          aria-controls="user-menu"
-          (click)="userMenu.toggle($event)"
-        >
-          <span
-            class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 text-xs font-semibold text-primary-700"
-            aria-hidden="true"
-            >{{ initials() }}</span
-          >
-          <span class="hidden sm:inline">{{ displayName() }}</span>
-          <i class="pi pi-angle-down text-xs" aria-hidden="true"></i>
-        </button>
-
-        <p-menu #userMenu id="user-menu" [model]="menuItems()" [popup]="true" />
       </div>
     </header>
   `,
 })
 export class Topbar {
   private readonly config = inject(AppConfigService);
-  private readonly store = inject(AuthStore);
-  private readonly auth = inject(AuthService);
-
-  readonly toggleSidebar = output<void>();
+  private readonly layout = inject(LayoutStore);
+  protected readonly i18n = inject(I18nService);
 
   readonly appName = computed(() => this.config.appName());
-  readonly displayName = computed(() => this.store.displayName());
-  readonly initials = computed(() => this.store.initials());
+  readonly sidebarExpanded = computed(() => this.layout.sidebarExpanded());
 
-  readonly menuItems = computed<MenuItem[]>(() => [
-    {
-      label: this.store.displayName(),
-      items: [
-        {
-          label: `บทบาท: ${this.store.roles().join(', ') || 'ไม่มีบทบาท'}`,
-          disabled: true,
-        },
-        {
-          label: 'ออกจากระบบ',
-          icon: 'pi pi-sign-out',
-          command: () => this.logout(),
-        },
-      ],
-    },
-  ]);
+  readonly toggleIcon = computed(() => {
+    if (this.layout.usesDrawer()) {
+      return this.layout.drawerOpen() ? 'pi pi-times' : 'pi pi-bars';
+    }
 
-  private logout(): void {
-    this.auth.logout().subscribe();
+    return this.sidebarExpanded() ? 'pi pi-chevron-left' : 'pi pi-bars';
+  });
+
+  readonly toggleLabel = computed(() => {
+    if (this.layout.usesDrawer()) {
+      return this.i18n.t(this.layout.drawerOpen() ? 'layout.sidebarClose' : 'layout.sidebarOpen');
+    }
+
+    return this.i18n.t(this.sidebarExpanded() ? 'layout.sidebarCollapse' : 'layout.sidebarExpand');
+  });
+
+  toggleSidebar(): void {
+    this.layout.toggleSidebar();
   }
 }

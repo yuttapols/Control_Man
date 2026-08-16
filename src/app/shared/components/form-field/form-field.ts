@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl } from '@angular/forms';
 import { EMPTY, switchMap } from 'rxjs';
 
-import { controlErrorText } from '../../validation/form-error.util';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { controlErrorMessage } from '../../validation/form-error.util';
 
 export function helpId(controlId: string): string {
   return `${controlId}-help`;
@@ -26,7 +27,7 @@ export function describedByIds(controlId: string): string {
         {{ label() }}
         @if (required()) {
           <span class="text-red-600" aria-hidden="true">*</span>
-          <span class="sr-only">จำเป็นต้องกรอก</span>
+          <span class="sr-only">{{ i18n.t('form.requiredMarker') }}</span>
         }
       </label>
 
@@ -50,6 +51,8 @@ export function describedByIds(controlId: string): string {
   `,
 })
 export class FormField {
+  protected readonly i18n = inject(I18nService);
+
   readonly label = input.required<string>();
   readonly controlId = input.required<string>();
   readonly control = input<AbstractControl | null>(null);
@@ -65,6 +68,12 @@ export class FormField {
   readonly errorText = computed(() => {
     this.controlEvents();
 
-    return controlErrorText(this.control());
+    const message = controlErrorMessage(this.control());
+
+    if (!message) {
+      return null;
+    }
+
+    return message.text ?? this.i18n.t(message.key, message.params);
   });
 }

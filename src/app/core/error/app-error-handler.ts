@@ -1,20 +1,20 @@
 import { ErrorHandler, Injectable, inject } from '@angular/core';
 
-import { isProblemDetail, problemMessage } from './problem-detail';
+import { I18nService } from '../i18n/i18n.service';
 import { NotificationService } from '../notification/notification.service';
+import { isProblemDetail } from './problem-detail';
 
 @Injectable()
 export class AppErrorHandler implements ErrorHandler {
   private readonly notifications = inject(NotificationService);
+  private readonly i18n = inject(I18nService);
 
   handleError(error: unknown): void {
     if (isProblemDetail(error)) {
       return;
     }
 
-    this.notifications.error(
-      'ระบบทำงานผิดพลาดโดยไม่คาดคิด กรุณาลองใหม่ หากยังพบปัญหาให้ติดต่อผู้ดูแลระบบ',
-    );
+    this.notifications.error(this.i18n.t('error.unhandled'));
 
     console.error(describe(error));
   }
@@ -23,10 +23,6 @@ export class AppErrorHandler implements ErrorHandler {
 function describe(error: unknown): string {
   if (error instanceof Error) {
     return `${error.name}: ${error.message}`;
-  }
-
-  if (isProblemDetail(error)) {
-    return problemMessage(error);
   }
 
   return 'Unhandled application error';

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
+import { I18nService } from '../../core/i18n/i18n.service';
 import { PageState } from '../../shared/components/page-state/page-state';
 
 @Component({
@@ -10,8 +11,8 @@ import { PageState } from '../../shared/components/page-state/page-state';
   template: `
     <app-page-state
       status="error"
-      title="ระบบขัดข้อง (500)"
-      description="ไม่สามารถให้บริการได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง หากยังพบปัญหาให้แจ้งผู้ดูแลระบบพร้อมรหัสอ้างอิงด้านล่าง"
+      [title]="i18n.t('page.serverErrorTitle')"
+      [description]="i18n.t('page.serverErrorDescription')"
       [requestId]="requestId()"
       [showRetry]="true"
       (retry)="reload()"
@@ -20,6 +21,7 @@ import { PageState } from '../../shared/components/page-state/page-state';
 })
 export class ServerErrorPage {
   private readonly route = inject(ActivatedRoute);
+  protected readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
 
   readonly requestId = computed(() => this.route.snapshot.queryParamMap.get('requestId') ?? '');

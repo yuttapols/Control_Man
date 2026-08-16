@@ -5,6 +5,9 @@ import { MenuItem } from 'primeng/api';
 import { Breadcrumb } from 'primeng/breadcrumb';
 import { filter } from 'rxjs';
 
+import { I18nService } from '../../core/i18n/i18n.service';
+import { TranslationKey } from '../../core/i18n/locales/th';
+
 export const BREADCRUMB_DATA_KEY = 'breadcrumb';
 
 @Component({
@@ -14,7 +17,7 @@ export const BREADCRUMB_DATA_KEY = 'breadcrumb';
   template: `
     <p-breadcrumb
       [model]="items()"
-      [home]="home"
+      [home]="home()"
       styleClass="border-none bg-transparent p-0 text-sm"
     />
   `,
@@ -22,21 +25,29 @@ export const BREADCRUMB_DATA_KEY = 'breadcrumb';
 export class AppBreadcrumb {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly i18n = inject(I18nService);
 
   private readonly navigationEnd = toSignal(
     this.router.events.pipe(filter((event) => event instanceof NavigationEnd)),
   );
 
-  readonly home: MenuItem = { icon: 'pi pi-home', routerLink: '/dashboard', label: 'หน้าแรก' };
+  readonly home = computed<MenuItem>(() => ({
+    icon: 'pi pi-home',
+    routerLink: '/dashboard',
+    label: this.i18n.t('layout.breadcrumbHome'),
+  }));
 
   readonly items = computed<MenuItem[]>(() => {
     this.navigationEnd();
 
-    return buildTrail(this.route.snapshot.root);
+    return buildTrail(this.route.snapshot.root, (key) => this.i18n.t(key));
   });
 }
 
-function buildTrail(root: ActivatedRouteSnapshot): MenuItem[] {
+function buildTrail(
+  root: ActivatedRouteSnapshot,
+  translate: (key: TranslationKey) => string,
+): MenuItem[] {
   const trail: MenuItem[] = [];
   const segments: string[] = [];
   let current: ActivatedRouteSnapshot | null = root;
@@ -48,10 +59,10 @@ function buildTrail(root: ActivatedRouteSnapshot): MenuItem[] {
       segments.push(path);
     }
 
-    const label = current.data[BREADCRUMB_DATA_KEY] as string | undefined;
+    const labelKey = current.data[BREADCRUMB_DATA_KEY] as TranslationKey | undefined;
 
-    if (label) {
-      trail.push({ label, routerLink: `/${segments.join('/')}` });
+    if (labelKey) {
+      trail.push({ label: translate(labelKey), routerLink: `/${segments.join('/')}` });
     }
 
     current = current.firstChild;

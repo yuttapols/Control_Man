@@ -5,7 +5,7 @@ import { AppValidators } from './app-validators';
 import {
   applyServerFieldErrors,
   clearServerFieldErrors,
-  controlErrorText,
+  controlErrorMessage,
   formErrorSummary,
   markAllControlsTouched,
 } from './form-error.util';
@@ -34,11 +34,11 @@ describe('form error util', () => {
   it('hides messages until the control is touched or dirty', () => {
     const form = buildForm();
 
-    expect(controlErrorText(form.controls['username'])).toBeNull();
+    expect(controlErrorMessage(form.controls['username'])).toBeNull();
 
     markAllControlsTouched(form);
 
-    expect(controlErrorText(form.controls['username'])).toBe('กรุณากรอกข้อมูลนี้');
+    expect(controlErrorMessage(form.controls['username'])?.key).toBe('validation.required');
   });
 
   it('reports one message per invalid control in the summary', () => {
@@ -46,10 +46,13 @@ describe('form error util', () => {
     form.patchValue({ username: 'ab cd', sourceUrl: 'javascript:alert(1)' });
     markAllControlsTouched(form);
 
-    const summary = formErrorSummary(form, { username: 'ชื่อผู้ใช้', sourceUrl: 'ลิงก์อ้างอิง' });
+    const summary = formErrorSummary(form, {
+      username: 'login.username',
+      sourceUrl: 'login.password',
+    });
 
-    expect(summary.map((item) => item.label)).toEqual(['ชื่อผู้ใช้', 'ลิงก์อ้างอิง']);
-    expect(summary[1].message).toContain('http://');
+    expect(summary.map((item) => item.labelKey)).toEqual(['login.username', 'login.password']);
+    expect(summary[1].message.key).toBe('validation.httpUrl');
   });
 
   it('maps server field errors onto matching controls', () => {
@@ -62,7 +65,7 @@ describe('form error util', () => {
       ]),
     );
 
-    expect(controlErrorText(form.controls['username'])).toBe('ชื่อผู้ใช้นี้ถูกใช้แล้ว');
+    expect(controlErrorMessage(form.controls['username'])?.text).toBe('ชื่อผู้ใช้นี้ถูกใช้แล้ว');
     expect(unmapped.map((item) => item.field)).toEqual(['unknownField']);
   });
 
@@ -75,6 +78,6 @@ describe('form error util', () => {
 
     clearServerFieldErrors(form);
 
-    expect(controlErrorText(form.controls['username'])).toBe('กรุณากรอกข้อมูลนี้');
+    expect(controlErrorMessage(form.controls['username'])?.key).toBe('validation.required');
   });
 });

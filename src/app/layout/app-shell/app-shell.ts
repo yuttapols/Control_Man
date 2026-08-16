@@ -1,39 +1,56 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { A11yModule } from '@angular/cdk/a11y';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 import { AppBreadcrumb } from '../breadcrumb/app-breadcrumb';
+import { I18nService } from '../../core/i18n/i18n.service';
+import { LayoutStore } from '../layout.store';
+import { AppBrand } from '../brand/app-brand';
 import { Sidebar } from '../sidebar/sidebar';
 import { Topbar } from '../topbar/topbar';
 
 @Component({
   selector: 'app-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, AppBreadcrumb, Sidebar, Topbar],
+  imports: [RouterOutlet, A11yModule, AppBreadcrumb, AppBrand, Sidebar, Topbar],
+  host: {
+    '(document:keydown.escape)': 'closeDrawer()',
+  },
   template: `
-    <div class="flex min-h-screen flex-col bg-surface-50">
-      <app-topbar (toggleSidebar)="toggleSidebar()" />
+    <div class="flex min-h-screen bg-surface-50">
+      <aside
+        class="app-sidebar-transition hidden shrink-0 flex-col border-r border-surface-200 bg-white lg:flex"
+        [class.w-64]="expanded()"
+        [class.w-18]="!expanded()"
+      >
+        <app-brand [compact]="!expanded()" />
+        <app-sidebar />
+      </aside>
 
-      <div class="flex flex-1 overflow-hidden">
-        <aside class="hidden w-64 shrink-0 border-r border-surface-200 bg-white lg:block">
-          <app-sidebar />
-        </aside>
+      @if (drawerOpen()) {
+        <div class="fixed inset-0 z-50 lg:hidden">
+          <button
+            type="button"
+            class="absolute inset-0 h-full w-full bg-surface-900/50"
+            [attr.aria-label]="i18n.t('layout.sidebarClose')"
+            (click)="closeDrawer()"
+          ></button>
+          <aside
+            class="app-drawer-enter absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col border-r border-surface-200 bg-white shadow-xl"
+            cdkTrapFocus
+            [cdkTrapFocusAutoCapture]="true"
+          >
+            <app-brand [compact]="false" [showClose]="true" (closeDrawer)="closeDrawer()" />
+            <app-sidebar (navigate)="closeDrawer()" />
+          </aside>
+        </div>
+      }
 
-        @if (sidebarOpen()) {
-          <div class="fixed inset-0 z-40 lg:hidden">
-            <button
-              type="button"
-              class="absolute inset-0 h-full w-full bg-black/40"
-              aria-label="ปิดเมนูหลัก"
-              (click)="closeSidebar()"
-            ></button>
-            <aside class="absolute inset-y-0 left-0 w-64 border-r border-surface-200 bg-white">
-              <app-sidebar (navigate)="closeSidebar()" />
-            </aside>
-          </div>
-        }
+      <div class="flex min-w-0 flex-1 flex-col">
+        <app-topbar />
 
-        <main class="flex-1 overflow-y-auto p-4 lg:p-6">
-          <div class="mx-auto flex max-w-7xl flex-col gap-4">
+        <main class="flex-1 px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
+          <div class="mx-auto flex w-full max-w-7xl flex-col gap-4">
             <app-breadcrumb />
             <router-outlet />
           </div>
@@ -43,13 +60,13 @@ import { Topbar } from '../topbar/topbar';
   `,
 })
 export class AppShell {
-  readonly sidebarOpen = signal(false);
+  private readonly layout = inject(LayoutStore);
+  protected readonly i18n = inject(I18nService);
 
-  toggleSidebar(): void {
-    this.sidebarOpen.update((open) => !open);
-  }
+  readonly expanded = computed(() => this.layout.sidebarExpanded());
+  readonly drawerOpen = computed(() => this.layout.drawerOpen());
 
-  closeSidebar(): void {
-    this.sidebarOpen.set(false);
+  closeDrawer(): void {
+    this.layout.closeDrawer();
   }
 }

@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Button } from 'primeng/button';
 
+import { I18nService } from '../../core/i18n/i18n.service';
 import { PageState } from '../../shared/components/page-state/page-state';
 
 @Component({
@@ -11,13 +12,15 @@ import { PageState } from '../../shared/components/page-state/page-state';
   template: `
     <app-page-state
       status="no-result"
-      title="ไม่พบหน้าที่ต้องการ (404)"
-      description="ลิงก์อาจถูกเปลี่ยนหรือถูกลบไปแล้ว กรุณาตรวจสอบที่อยู่หน้าเว็บอีกครั้ง"
+      [title]="i18n.t('page.notFoundTitle')"
+      [description]="i18n.t('page.notFoundDescription')"
     />
 
     <div class="flex justify-center">
-      <p-button label="กลับสู่หน้าแรก" icon="pi pi-home" routerLink="/dashboard" />
+      <p-button [label]="i18n.t('page.backHome')" icon="pi pi-home" routerLink="/dashboard" />
     </div>
   `,
 })
-export class NotFoundPage {}
+export class NotFoundPage {
+  protected readonly i18n = inject(I18nService);
+}

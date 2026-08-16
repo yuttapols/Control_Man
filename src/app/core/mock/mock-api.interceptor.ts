@@ -5,7 +5,7 @@ import { Observable, delay, of, throwError } from 'rxjs';
 import { ApiResponse, ProblemDetail } from '../../shared/models/api.model';
 import { AUTH_ENDPOINTS, AuthSession, LoginRequest } from '../auth/auth.model';
 import { AppConfigService } from '../config/app-config.service';
-import { createCorrelationId } from '../http/correlation.interceptor';
+import { createRequestId } from '../http/request-id.interceptor';
 import { isTrustedApiUrl } from '../utils/url.util';
 import { MockAccount, findMockAccount, findMockAccountById } from './mock-accounts';
 
@@ -43,7 +43,7 @@ function handleLogin(body: LoginRequest | null, url: string): Observable<HttpRes
   const account = body ? findMockAccount(body.username ?? '') : undefined;
 
   if (!account || account.password !== body?.password) {
-    return failure(401, 'AUTHENTICATION_FAILED', 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', url);
+    return failure(401, 'UNAUTHENTICATED', 'Invalid username or password', url);
   }
 
   storeMockSubject(account.user.id);
@@ -56,7 +56,7 @@ function handleRefresh(url: string): Observable<HttpResponse<unknown>> {
   const account = subject ? findMockAccountById(subject) : undefined;
 
   if (!account) {
-    return failure(401, 'SESSION_EXPIRED', 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง', url);
+    return failure(401, 'UNAUTHENTICATED', 'Authentication required', url);
   }
 
   return success(buildSession(account));
@@ -73,7 +73,7 @@ function handleCurrentUser(url: string): Observable<HttpResponse<unknown>> {
   const account = subject ? findMockAccountById(subject) : undefined;
 
   if (!account) {
-    return failure(401, 'SESSION_EXPIRED', 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง', url);
+    return failure(401, 'UNAUTHENTICATED', 'Authentication required', url);
   }
 
   return success(account.user);
@@ -81,7 +81,7 @@ function handleCurrentUser(url: string): Observable<HttpResponse<unknown>> {
 
 function buildSession(account: MockAccount): AuthSession {
   return {
-    accessToken: `mock.${account.user.id}.${createCorrelationId()}`,
+    accessToken: `mock.${account.user.id}.${createRequestId()}`,
     tokenType: 'Bearer',
     expiresIn: MOCK_TOKEN_TTL_SECONDS,
     csrfToken: `mock-csrf.${account.user.id}`,
@@ -94,7 +94,7 @@ function success<T>(data: T): Observable<HttpResponse<ApiResponse<T>>> {
     data,
     meta: {
       apiVersion: 'v1',
-      requestId: createCorrelationId(),
+      requestId: createRequestId(),
       generatedAt: new Date().toISOString(),
     },
   };
@@ -115,7 +115,7 @@ function failure(
     code,
     detail,
     instance,
-    requestId: createCorrelationId(),
+    requestId: createRequestId(),
   };
 
   return throwError(

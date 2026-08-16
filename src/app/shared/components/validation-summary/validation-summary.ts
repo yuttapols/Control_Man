@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 
+import { I18nService } from '../../../core/i18n/i18n.service';
 import { FormErrorItem } from '../../validation/form-error.util';
 
 @Component({
@@ -13,12 +14,12 @@ import { FormErrorItem } from '../../validation/form-error.util';
       >
         <div class="flex items-center gap-2 font-semibold">
           <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
-          {{ title() }}
+          {{ title() || i18n.t('form.validationSummaryTitle') }}
         </div>
 
         <ul class="ml-5 list-disc">
           @for (item of items(); track item.field) {
-            <li>{{ item.label }}: {{ item.message }}</li>
+            <li>{{ labelOf(item) }}: {{ messageOf(item) }}</li>
           }
         </ul>
       </div>
@@ -26,8 +27,18 @@ import { FormErrorItem } from '../../validation/form-error.util';
   `,
 })
 export class ValidationSummary {
+  protected readonly i18n = inject(I18nService);
+
   readonly items = input.required<readonly FormErrorItem[]>();
-  readonly title = input('กรุณาตรวจสอบข้อมูลต่อไปนี้');
+  readonly title = input('');
 
   readonly visible = computed(() => this.items().length > 0);
+
+  labelOf(item: FormErrorItem): string {
+    return item.labelKey ? this.i18n.t(item.labelKey) : item.field;
+  }
+
+  messageOf(item: FormErrorItem): string {
+    return item.message.text ?? this.i18n.t(item.message.key, item.message.params);
+  }
 }

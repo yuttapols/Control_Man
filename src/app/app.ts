@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { Toast } from 'primeng/toast';
 
 import { AppConfigService } from './core/config/app-config.service';
+import { I18nService } from './core/i18n/i18n.service';
 
 @Component({
   selector: 'app-root',
@@ -15,7 +16,7 @@ import { AppConfigService } from './core/config/app-config.service';
         class="flex items-center justify-center gap-2 bg-amber-100 px-4 py-2 text-sm text-amber-900"
       >
         <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
-        โหลดการตั้งค่าระบบไม่สำเร็จ ระบบกำลังใช้ค่าเริ่มต้นสำหรับการพัฒนา
+        {{ i18n.t('app.configLoadFailed') }}
       </div>
     }
 
@@ -25,6 +26,7 @@ import { AppConfigService } from './core/config/app-config.service';
 })
 export class App {
   private readonly config = inject(AppConfigService);
+  protected readonly i18n = inject(I18nService);
 
   readonly configLoadFailed = computed(() => this.config.configLoadFailed());
 }

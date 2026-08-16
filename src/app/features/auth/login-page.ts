@@ -9,7 +9,8 @@ import { Password } from 'primeng/password';
 
 import { AuthService } from '../../core/auth/auth.service';
 import { AppConfigService } from '../../core/config/app-config.service';
-import { problemMessage } from '../../core/error/problem-detail';
+import { I18nService } from '../../core/i18n/i18n.service';
+import { TranslationKey } from '../../core/i18n/locales/th';
 import { DEFAULT_LANDING_URL, sanitizeReturnUrl } from '../../core/utils/url.util';
 import { EnvironmentBadge } from '../../shared/components/environment-badge/environment-badge';
 import { FormField, describedByIds } from '../../shared/components/form-field/form-field';
@@ -26,12 +27,17 @@ import {
 
 const REMEMBERED_USERNAME_KEY = 'thc.remembered-username';
 
-const FIELD_LABELS: Readonly<Record<string, string>> = {
-  username: 'ชื่อผู้ใช้หรืออีเมล',
-  password: 'รหัสผ่าน',
+const FIELD_LABEL_KEYS: Readonly<Record<string, TranslationKey>> = {
+  username: 'login.username',
+  password: 'login.password',
 };
 
-const GENERIC_AUTH_ERROR = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบแล้วลองใหม่';
+
+const BRAND_HIGHLIGHT_KEYS: readonly TranslationKey[] = [
+  'login.heroHighlight1',
+  'login.heroHighlight2',
+  'login.heroHighlight3',
+];
 
 @Component({
   selector: 'app-login-page',
@@ -48,15 +54,56 @@ const GENERIC_AUTH_ERROR = 'ชื่อผู้ใช้หรือรหั�
     ValidationSummary,
   ],
   template: `
-    <div class="flex min-h-screen items-center justify-center bg-surface-100 p-4">
-      <div class="w-full max-w-md rounded-xl border border-surface-200 bg-white p-8 shadow-sm">
-        <div class="mb-6 flex flex-col items-center gap-2 text-center">
-          <h1 class="text-xl font-semibold text-surface-900">{{ appName() }}</h1>
-          <p class="text-sm text-surface-500">เข้าสู่ระบบเพื่อใช้งานระบบควบคุมวันหยุด</p>
-          <app-environment-badge />
+    <div class="grid min-h-screen bg-white lg:grid-cols-2">
+      <section
+        class="app-brand-gradient hidden flex-col justify-between p-10 text-white lg:flex xl:p-14"
+      >
+        <div class="flex items-center gap-3">
+          <span
+            class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 backdrop-blur"
+            aria-hidden="true"
+          >
+            <i class="pi pi-calendar-clock text-xl"></i>
+          </span>
+          <span class="text-lg font-bold">{{ appName() }}</span>
         </div>
 
-        <form class="flex flex-col gap-4" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="flex flex-col gap-4">
+          <h2 class="text-3xl font-bold xl:text-4xl">{{ i18n.t('login.heroTitle') }}</h2>
+          <p class="max-w-md text-sm text-white/85">
+            {{ i18n.t('login.heroDescription') }}
+          </p>
+
+          <ul class="flex flex-col gap-2.5 text-sm text-white/85">
+            @for (highlightKey of highlightKeys; track highlightKey) {
+              <li class="flex items-center gap-2.5">
+                <i class="pi pi-check-circle" aria-hidden="true"></i>
+                <span>{{ i18n.t(highlightKey) }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+
+        <p class="text-xs text-white/70">{{ i18n.t('login.heroFooter') }}</p>
+      </section>
+
+      <section class="flex items-center justify-center bg-surface-50 p-4 sm:p-8">
+        <div
+          class="w-full max-w-md rounded-2xl border border-surface-200 bg-white p-6 shadow-sm sm:p-8"
+        >
+          <div class="mb-6 flex flex-col items-center gap-2 text-center">
+            <span
+              class="mb-1 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-600 text-white shadow-sm lg:hidden"
+              aria-hidden="true"
+            >
+              <i class="pi pi-calendar-clock text-xl"></i>
+            </span>
+            <h1 class="text-xl font-bold text-surface-900">{{ appName() }}</h1>
+            <p class="text-sm text-surface-500">{{ i18n.t('login.subtitle') }}</p>
+            <app-environment-badge />
+          </div>
+
+          <form class="flex flex-col gap-4" [formGroup]="form" (ngSubmit)="submit()" novalidate>
           @if (errorSummary().length > 1) {
             <app-validation-summary [items]="errorSummary()" />
           }
@@ -66,7 +113,7 @@ const GENERIC_AUTH_ERROR = 'ชื่อผู้ใช้หรือรหั�
           }
 
           <app-form-field
-            label="ชื่อผู้ใช้หรืออีเมล"
+            [label]="i18n.t('login.username')"
             controlId="username"
             [control]="form.controls.username"
             [required]="true"
@@ -84,7 +131,7 @@ const GENERIC_AUTH_ERROR = 'ชื่อผู้ใช้หรือรหั�
           </app-form-field>
 
           <app-form-field
-            label="รหัสผ่าน"
+            [label]="i18n.t('login.password')"
             controlId="password"
             [control]="form.controls.password"
             [required]="true"
@@ -107,22 +154,23 @@ const GENERIC_AUTH_ERROR = 'ชื่อผู้ใช้หรือรหั�
               formControlName="rememberUsername"
               [binary]="true"
             />
-            <label for="rememberUsername" class="text-sm text-surface-700">จดจำชื่อผู้ใช้</label>
+            <label for="rememberUsername" class="text-sm text-surface-700">{{ i18n.t('login.rememberUsername') }}</label>
           </div>
 
           <p-button
             type="submit"
-            label="เข้าสู่ระบบ"
+            [label]="i18n.t('login.submit')"
             icon="pi pi-sign-in"
             styleClass="w-full"
             [loading]="submitting()"
           />
-        </form>
+          </form>
 
-        <p class="mt-6 text-center text-xs text-surface-500">
-          ลืมรหัสผ่านหรือบัญชีถูกล็อก กรุณาติดต่อผู้ดูแลระบบ
-        </p>
-      </div>
+          <p class="mt-6 text-center text-xs text-surface-500">
+            {{ i18n.t('login.contactAdmin') }}
+          </p>
+        </div>
+      </section>
     </div>
   `,
 })
@@ -132,6 +180,7 @@ export class LoginPage {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly config = inject(AppConfigService);
+  protected readonly i18n = inject(I18nService);
 
   readonly form = this.fb.group({
     username: ['', [Validators.required, AppValidators.notBlank(), AppValidators.username()]],
@@ -144,6 +193,7 @@ export class LoginPage {
   readonly errorSummary = signal<readonly FormErrorItem[]>([]);
 
   readonly appName = computed(() => this.config.appName());
+  readonly highlightKeys = BRAND_HIGHLIGHT_KEYS;
   readonly usernameDescribedBy = describedByIds('username');
   readonly passwordPassThrough = {
     pcInputText: { root: { 'aria-describedby': describedByIds('password') } },
@@ -163,7 +213,7 @@ export class LoginPage {
 
     if (this.form.invalid) {
       markAllControlsTouched(this.form);
-      this.errorSummary.set(formErrorSummary(this.form, FIELD_LABELS));
+      this.errorSummary.set(formErrorSummary(this.form, FIELD_LABEL_KEYS));
       return;
     }
 
@@ -186,7 +236,7 @@ export class LoginPage {
 
   private handleLoginError(problem: ProblemDetail): void {
     if (problem.status === 401) {
-      this.authError.set(GENERIC_AUTH_ERROR);
+      this.authError.set(this.i18n.t('login.invalidCredentials'));
       this.form.controls.password.reset();
       return;
     }
@@ -194,10 +244,10 @@ export class LoginPage {
     const unmapped = applyServerFieldErrors(this.form, problem);
 
     if (unmapped.length > 0 || (problem.errors ?? []).length === 0) {
-      this.authError.set(problemMessage(problem));
+      this.authError.set(this.i18n.problemMessage(problem));
     }
 
-    this.errorSummary.set(formErrorSummary(this.form, FIELD_LABELS));
+    this.errorSummary.set(formErrorSummary(this.form, FIELD_LABEL_KEYS));
   }
 
   private persistUsername(username: string, remember: boolean): void {
