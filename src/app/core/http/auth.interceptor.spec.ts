@@ -11,7 +11,9 @@ import { authInterceptor } from './auth.interceptor';
 
 const PORTAL_URL = '/api/v1/portal/holidays';
 const OTHER_PORTAL_URL = '/api/v1/portal/users';
+const LOGIN_URL = '/api/v1/portal/auth/login';
 const REFRESH_URL = '/api/v1/portal/auth/refresh';
+const LOGOUT_URL = '/api/v1/portal/auth/logout';
 const EXTERNAL_URL = 'https://third-party.example/data';
 
 const session: AuthSession = {
@@ -71,6 +73,17 @@ describe('authInterceptor', () => {
     expect(request.request.headers.has('Authorization')).toBe(false);
     request.flush({});
   });
+
+  it.each([LOGIN_URL, REFRESH_URL, LOGOUT_URL])(
+    'does not attach the access token to %s',
+    (url) => {
+      http.post(url, {}).subscribe();
+
+      const request = httpMock.expectOne(url);
+      expect(request.request.headers.has('Authorization')).toBe(false);
+      request.flush({});
+    },
+  );
 
   it('refreshes once for concurrent unauthorized requests and retries both', () => {
     const results: string[] = [];

@@ -2,6 +2,25 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.7.
 
+## Application version
+
+Current version: **1.0.0**
+
+The application follows [Semantic Versioning](https://semver.org/) in the `MAJOR.MINOR.PATCH` format:
+
+- **MAJOR** — `1.x.x`: a major system change that may include breaking changes.
+- **MINOR** — `x.4.x`: a new feature that remains compatible with existing functionality.
+- **PATCH** — `x.x.2`: a bug fix or small improvement.
+
+Version progression examples:
+
+- `1.0.0` — initial release.
+- `1.0.1` — bug fix.
+- `1.0.2` — additional bug fix.
+- `1.1.0` — new feature.
+- `1.2.0` — another group of new features.
+- `2.0.0` — major system change or breaking change.
+
 ## Development server
 
 To start a local development server, run:

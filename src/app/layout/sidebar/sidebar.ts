@@ -7,6 +7,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { LayoutStore } from '../layout.store';
 import { NAV_SECTIONS, NavSection } from '../nav.config';
 import { UserMenu } from '../user-menu/user-menu';
+import { APP_VERSION } from '../../shared/constants/app-version.constant';
 
 @Component({
   selector: 'app-sidebar',
@@ -57,6 +58,12 @@ import { UserMenu } from '../user-menu/user-menu';
 
     <div class="shrink-0 border-t border-surface-200 p-2">
       <app-user-menu />
+      <p
+        class="mt-1 text-center text-[0.6875rem] text-surface-400"
+        [attr.aria-label]="'Version ' + appVersion"
+      >
+        {{ expanded() ? 'Version ' + appVersion : 'v' + appVersion }}
+      </p>
     </div>
   `,
   styles: `
@@ -85,6 +92,7 @@ export class Sidebar {
   readonly navigate = output<void>();
 
   readonly expanded = computed(() => this.layout.sidebarExpanded());
+  readonly appVersion = APP_VERSION;
 
   readonly visibleSections = computed<NavSection[]>(() =>
     NAV_SECTIONS.map((section) => ({

@@ -16,6 +16,7 @@ import { EnvironmentBadge } from '../../shared/components/environment-badge/envi
 import { FormField, describedByIds } from '../../shared/components/form-field/form-field';
 import { ValidationSummary } from '../../shared/components/validation-summary/validation-summary';
 import { ProblemDetail } from '../../shared/models/api.model';
+import { APP_VERSION } from '../../shared/constants/app-version.constant';
 import { AppValidators } from '../../shared/validation/app-validators';
 import {
   FormErrorItem,
@@ -164,6 +165,7 @@ const BRAND_HIGHLIGHT_KEYS: readonly TranslationKey[] = [
             styleClass="w-full"
             [loading]="submitting()"
           />
+          <p class="text-center text-xs text-surface-400">Version {{ appVersion }}</p>
           </form>
 
           <p class="mt-6 text-center text-xs text-surface-500">
@@ -193,6 +195,7 @@ export class LoginPage {
   readonly errorSummary = signal<readonly FormErrorItem[]>([]);
 
   readonly appName = computed(() => this.config.appName());
+  readonly appVersion = APP_VERSION;
   readonly highlightKeys = BRAND_HIGHLIGHT_KEYS;
   readonly usernameDescribedBy = describedByIds('username');
   readonly passwordPassThrough = {

@@ -31,7 +31,8 @@ export const AUTH_ENDPOINTS = {
   currentUser: '/auth/me',
 } as const;
 
-export const ANONYMOUS_ENDPOINTS: readonly string[] = [
+export const AUTH_BEARER_SKIP_ENDPOINTS: readonly string[] = [
   AUTH_ENDPOINTS.login,
   AUTH_ENDPOINTS.refresh,
+  AUTH_ENDPOINTS.logout,
 ];

@@ -17,6 +17,7 @@ import { AppConfigService } from './core/config/app-config.service';
 import { AppErrorHandler } from './core/error/app-error-handler';
 import { AppTitleStrategy } from './core/i18n/app-title.strategy';
 import { authInterceptor } from './core/http/auth.interceptor';
+import { credentialsInterceptor } from './core/http/credentials.interceptor';
 import { errorInterceptor } from './core/http/error.interceptor';
 import { loadingInterceptor } from './core/http/loading.interceptor';
 import { requestIdInterceptor } from './core/http/request-id.interceptor';
@@ -30,6 +31,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'top' })),
     provideHttpClient(
       withInterceptors([
+        credentialsInterceptor,
         requestIdInterceptor,
         loadingInterceptor,
         errorInterceptor,

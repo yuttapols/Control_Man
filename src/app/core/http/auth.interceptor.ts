@@ -3,7 +3,7 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, switchMap, throwError } from 'rxjs';
 
-import { ANONYMOUS_ENDPOINTS } from '../auth/auth.model';
+import { AUTH_BEARER_SKIP_ENDPOINTS } from '../auth/auth.model';
 import { AuthService } from '../auth/auth.service';
 import { AuthStore } from '../auth/auth.store';
 import { AppConfigService } from '../config/app-config.service';
@@ -18,7 +18,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
-  if (!isTrustedApiUrl(req.url, config.apiBaseUrl()) || isAnonymousEndpoint(req.url)) {
+  if (!isTrustedApiUrl(req.url, config.apiBaseUrl()) || skipsBearerToken(req.url)) {
     return next(req);
   }
 
@@ -56,8 +56,8 @@ function withBearerToken(req: HttpRequest<unknown>, token: string): HttpRequest<
   return req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
 }
 
-function isAnonymousEndpoint(url: string): boolean {
-  return ANONYMOUS_ENDPOINTS.some((endpoint) => url.endsWith(endpoint));
+function skipsBearerToken(url: string): boolean {
+  return AUTH_BEARER_SKIP_ENDPOINTS.some((endpoint) => url.endsWith(endpoint));
 }
 
 function statusOf(error: unknown): number {

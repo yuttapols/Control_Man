@@ -14,6 +14,6 @@ export const FALLBACK_APP_CONFIG: AppConfig = {
   appName: 'Thai Holiday Control',
   environment: 'DEV',
   apiBaseUrl: '/api/v1/portal',
-  useMockApi: true,
+  useMockApi: false,
   apiTimeoutMs: 30000,
 };
