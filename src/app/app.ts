@@ -4,11 +4,12 @@ import { Toast } from 'primeng/toast';
 
 import { AppConfigService } from './core/config/app-config.service';
 import { I18nService } from './core/i18n/i18n.service';
+import { PageLoading } from './shared/components/spinner/page-loading';
 
 @Component({
   selector: 'app-root',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, Toast],
+  imports: [RouterOutlet, Toast, PageLoading],
   template: `
     @if (configLoadFailed()) {
       <div
@@ -22,6 +23,7 @@ import { I18nService } from './core/i18n/i18n.service';
 
     <router-outlet />
     <p-toast position="top-right" />
+    <app-page-loading />
   `,
 })
 export class App {

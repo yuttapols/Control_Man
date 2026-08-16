@@ -73,5 +73,13 @@ export const AppPreset = definePreset(Aura, {
     toast: {
       root: { borderRadius: '{border.radius.lg}' },
     },
+    progressspinner: {
+      root: {
+        colorOne: '{primary.500}',
+        colorTwo: '{primary.400}',
+        colorThree: '{primary.600}',
+        colorFour: '{primary.500}',
+      },
+    },
   },
 });

@@ -2,28 +2,35 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 
-import {
-  ApiResponse,
-  EMPTY_PAGE,
-  PagedResult,
-  QueryParams,
-} from '../../shared/models/api.model';
+import { ApiResponse, EMPTY_PAGE, PagedResult, QueryParams } from '../../shared/models/api.model';
 import { AppConfigService } from '../config/app-config.service';
+import { httpContextFor } from '../http/http-context';
 import { joinUrl } from '../utils/url.util';
+
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+
+export interface ApiRequestOptions {
+  query?: QueryParams;
+  timeoutMs?: number;
+  skipLoading?: boolean;
+  withCredentials?: boolean;
+}
+
+interface DispatchOptions extends ApiRequestOptions {
+  body?: unknown;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private readonly http = inject(HttpClient);
   private readonly config = inject(AppConfigService);
 
-  get<T>(path: string, query?: QueryParams): Observable<T> {
-    return this.http
-      .get<ApiResponse<T>>(this.url(path), { params: toHttpParams(query) })
-      .pipe(map(unwrap));
+  get<T>(path: string, options: ApiRequestOptions = {}): Observable<T> {
+    return this.dispatch<ApiResponse<T>>('GET', path, options).pipe(map(unwrap));
   }
 
-  getPaged<T>(path: string, query?: QueryParams): Observable<PagedResult<T>> {
-    return this.http.get<ApiResponse<T[]>>(this.url(path), { params: toHttpParams(query) }).pipe(
+  getPaged<T>(path: string, options: ApiRequestOptions = {}): Observable<PagedResult<T>> {
+    return this.dispatch<ApiResponse<T[]>>('GET', path, options).pipe(
       map((response) => ({
         items: response.data,
         page: response.meta.page ?? EMPTY_PAGE,
@@ -31,24 +38,38 @@ export class ApiService {
     );
   }
 
-  post<T>(path: string, body?: unknown): Observable<T> {
-    return this.http.post<ApiResponse<T>>(this.url(path), body ?? {}).pipe(map(unwrap));
+  post<T>(path: string, body?: unknown, options: ApiRequestOptions = {}): Observable<T> {
+    return this.dispatch<ApiResponse<T>>('POST', path, { ...options, body: body ?? {} }).pipe(
+      map(unwrap),
+    );
   }
 
-  put<T>(path: string, body: unknown): Observable<T> {
-    return this.http.put<ApiResponse<T>>(this.url(path), body).pipe(map(unwrap));
+  put<T>(path: string, body: unknown, options: ApiRequestOptions = {}): Observable<T> {
+    return this.dispatch<ApiResponse<T>>('PUT', path, { ...options, body }).pipe(map(unwrap));
   }
 
-  patch<T>(path: string, body: unknown): Observable<T> {
-    return this.http.patch<ApiResponse<T>>(this.url(path), body).pipe(map(unwrap));
+  patch<T>(path: string, body: unknown, options: ApiRequestOptions = {}): Observable<T> {
+    return this.dispatch<ApiResponse<T>>('PATCH', path, { ...options, body }).pipe(map(unwrap));
   }
 
-  delete<T>(path: string): Observable<T> {
-    return this.http.delete<ApiResponse<T>>(this.url(path)).pipe(map(unwrap));
+  delete<T>(path: string, options: ApiRequestOptions = {}): Observable<T> {
+    return this.dispatch<ApiResponse<T>>('DELETE', path, options).pipe(map(unwrap));
   }
 
   url(path: string): string {
     return joinUrl(this.config.apiBaseUrl(), path);
+  }
+
+  private dispatch<T>(method: HttpMethod, path: string, options: DispatchOptions): Observable<T> {
+    return this.http.request<T>(method, this.url(path), {
+      body: options.body,
+      params: toHttpParams(options.query),
+      context: httpContextFor({
+        skipLoading: options.skipLoading,
+        timeoutMs: options.timeoutMs,
+      }),
+      withCredentials: options.withCredentials ?? false,
+    });
   }
 }
 

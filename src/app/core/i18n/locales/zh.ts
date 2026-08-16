@@ -68,6 +68,7 @@ export const ZH: Readonly<Record<TranslationKey, string>> = {
   'pageState.forbiddenTitle': '您无权访问该数据',
   'pageState.forbiddenDescription': '如需更多权限，请联系系统管理员。',
 
+  'common.loading': '加载中...',
   'form.requiredMarker': '必填',
   'form.validationSummaryTitle': '请检查以下内容',
 
@@ -105,6 +106,7 @@ export const ZH: Readonly<Record<TranslationKey, string>> = {
   'error.message.rateLimited': '请求过于频繁，请稍候再试。',
   'error.message.internal': '系统故障，请稍后重试。',
   'error.message.dependencyUnavailable': '服务暂时不可用，请稍后再试。',
+  'error.message.timeout': '服务器响应超时，请稍后重试。',
   'error.message.fallback': '发生未预期的错误，请稍后重试。',
 
   'error.title.network': '连接失败',
@@ -119,6 +121,7 @@ export const ZH: Readonly<Record<TranslationKey, string>> = {
   'error.title.rateLimited': '请求过于频繁',
   'error.title.internal': '系统故障',
   'error.title.dependencyUnavailable': '服务不可用',
+  'error.title.timeout': '请求超时',
   'error.title.fallback': '发生错误',
 
   'error.unhandled': '系统发生未预期的错误，请重试；若问题持续，请联系系统管理员。',

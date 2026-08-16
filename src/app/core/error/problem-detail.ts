@@ -4,6 +4,7 @@ import { TranslationKey } from '../i18n/locales/th';
 import { FieldError, ProblemDetail } from '../../shared/models/api.model';
 
 export const NETWORK_ERROR_CODE = 'NETWORK_ERROR';
+export const TIMEOUT_ERROR_CODE = 'TIMEOUT_ERROR';
 export const UNKNOWN_ERROR_CODE = 'UNKNOWN_ERROR';
 
 const STATUS_MESSAGE_KEYS: Readonly<Record<number, TranslationKey>> = {
@@ -49,6 +50,7 @@ const CODE_MESSAGE_KEYS: Readonly<Record<string, TranslationKey>> = {
   [ERROR_CODES.internal]: 'error.message.internal',
   [ERROR_CODES.dependencyUnavailable]: 'error.message.dependencyUnavailable',
   [NETWORK_ERROR_CODE]: 'error.message.network',
+  [TIMEOUT_ERROR_CODE]: 'error.message.timeout',
 };
 
 const CODE_TITLE_KEYS: Readonly<Record<string, TranslationKey>> = {
@@ -64,6 +66,7 @@ const CODE_TITLE_KEYS: Readonly<Record<string, TranslationKey>> = {
   [ERROR_CODES.internal]: 'error.title.internal',
   [ERROR_CODES.dependencyUnavailable]: 'error.title.dependencyUnavailable',
   [NETWORK_ERROR_CODE]: 'error.title.network',
+  [TIMEOUT_ERROR_CODE]: 'error.title.timeout',
 };
 
 export function isProblemDetail(value: unknown): value is ProblemDetail {
@@ -132,7 +135,11 @@ export function isNotifiableError(problem: ProblemDetail): boolean {
   return problem.status === 0 || problem.status === 429 || problem.status >= 500;
 }
 
-function buildProblemDetail(status: number, code: string, instance: string): ProblemDetail {
+export function buildProblemDetail(
+  status: number,
+  code: string,
+  instance: string,
+): ProblemDetail {
   return {
     type: 'about:blank',
     title: '',

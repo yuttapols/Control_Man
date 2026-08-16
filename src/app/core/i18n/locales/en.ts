@@ -71,6 +71,7 @@ export const EN: Readonly<Record<TranslationKey, string>> = {
   'pageState.forbiddenDescription':
     'Please contact your administrator if you need additional access.',
 
+  'common.loading': 'Loading...',
   'form.requiredMarker': 'required',
   'form.validationSummaryTitle': 'Please review the following',
 
@@ -116,6 +117,7 @@ export const EN: Readonly<Record<TranslationKey, string>> = {
   'error.message.internal': 'Something went wrong. Please try again.',
   'error.message.dependencyUnavailable':
     'The service is temporarily unavailable. Please try again later.',
+  'error.message.timeout': 'The server took too long to respond. Please try again.',
   'error.message.fallback': 'An unexpected error occurred. Please try again.',
 
   'error.title.network': 'Connection failed',
@@ -130,6 +132,7 @@ export const EN: Readonly<Record<TranslationKey, string>> = {
   'error.title.internal': 'System error',
   'error.title.rateLimited': 'Too many requests',
   'error.title.dependencyUnavailable': 'Service unavailable',
+  'error.title.timeout': 'Request timed out',
   'error.title.fallback': 'Error',
 
   'error.unhandled':

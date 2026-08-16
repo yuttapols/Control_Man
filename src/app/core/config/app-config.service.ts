@@ -13,6 +13,7 @@ export class AppConfigService {
   readonly environment = computed(() => this.state().environment);
   readonly apiBaseUrl = computed(() => this.state().apiBaseUrl);
   readonly useMockApi = computed(() => this.state().useMockApi);
+  readonly apiTimeoutMs = computed(() => this.state().apiTimeoutMs);
   readonly isProduction = computed(() => this.state().environment === 'PROD');
 
   async load(): Promise<void> {

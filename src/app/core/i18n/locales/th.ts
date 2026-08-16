@@ -67,6 +67,7 @@ export const TH = {
   'pageState.forbiddenTitle': 'คุณไม่มีสิทธิ์เข้าถึงข้อมูลนี้',
   'pageState.forbiddenDescription': 'หากต้องการสิทธิ์เพิ่มเติม กรุณาติดต่อผู้ดูแลระบบ',
 
+  'common.loading': 'กำลังโหลด...',
   'form.requiredMarker': 'จำเป็นต้องกรอก',
   'form.validationSummaryTitle': 'กรุณาตรวจสอบข้อมูลต่อไปนี้',
 
@@ -104,6 +105,7 @@ export const TH = {
   'error.message.rateLimited': 'มีการเรียกใช้งานถี่เกินกำหนด กรุณารอสักครู่แล้วลองใหม่',
   'error.message.internal': 'ระบบขัดข้อง กรุณาลองใหม่อีกครั้ง',
   'error.message.dependencyUnavailable': 'ระบบไม่พร้อมให้บริการชั่วคราว กรุณาลองใหม่ภายหลัง',
+  'error.message.timeout': 'เซิร์ฟเวอร์ตอบกลับช้าเกินกำหนด กรุณาลองใหม่อีกครั้ง',
   'error.message.fallback': 'เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่อีกครั้ง',
 
   'error.title.network': 'เชื่อมต่อไม่ได้',
@@ -118,6 +120,7 @@ export const TH = {
   'error.title.rateLimited': 'เรียกใช้งานถี่เกินไป',
   'error.title.internal': 'ระบบขัดข้อง',
   'error.title.dependencyUnavailable': 'ระบบไม่พร้อมให้บริการ',
+  'error.title.timeout': 'หมดเวลาเชื่อมต่อ',
   'error.title.fallback': 'เกิดข้อผิดพลาด',
 
   'error.unhandled': 'ระบบทำงานผิดพลาดโดยไม่คาดคิด กรุณาลองใหม่ หากยังพบปัญหาให้ติดต่อผู้ดูแลระบบ',

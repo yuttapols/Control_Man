@@ -18,7 +18,9 @@ import { AppErrorHandler } from './core/error/app-error-handler';
 import { AppTitleStrategy } from './core/i18n/app-title.strategy';
 import { authInterceptor } from './core/http/auth.interceptor';
 import { errorInterceptor } from './core/http/error.interceptor';
+import { loadingInterceptor } from './core/http/loading.interceptor';
 import { requestIdInterceptor } from './core/http/request-id.interceptor';
+import { timeoutInterceptor } from './core/http/timeout.interceptor';
 import { mockApiInterceptor } from './core/mock/mock-api.interceptor';
 import { AppPreset } from './core/theme/app-preset';
 
@@ -29,8 +31,10 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withInterceptors([
         requestIdInterceptor,
+        loadingInterceptor,
         errorInterceptor,
         authInterceptor,
+        timeoutInterceptor,
         mockApiInterceptor,
       ]),
     ),

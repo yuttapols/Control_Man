@@ -309,6 +309,10 @@ keyboard ครบทุก flow · focus indicator ชัด (`:focus-visible` 
 | `core/i18n/i18n.service.ts` | `t()`, `language()`, `locale()`, `setLanguage()`, `problemMessage/Title()` | ✅ |
 | `layout/layout.store.ts` | สถานะ sidebar (drawer/rail/expanded) + จำค่าที่ผู้ใช้เลือก | ✅ |
 | `core/utils/media-query.util.ts` | `mediaQuerySignal()` แปลง breakpoint เป็น signal | ✅ |
+| `core/api/api.service.ts` | **ประตูเดียวที่คุยกับ HTTP** — `dispatch()` แกนกลาง + option ต่อคำขอ | ✅ |
+| `core/http/loading.store.ts` | นับ request ที่ค้าง + แยก scope page/modal | ✅ |
+| `core/http/http-context.ts` | `SKIP_LOADING`, `REQUEST_TIMEOUT_MS`, `httpContextFor()` | ✅ |
+| `shared/components/spinner/*` | `AppSpinner` / `PageLoading` / `ModalLoading` | ✅ |
 | `core/http/*.interceptor.ts` | correlation id, error → toast/normalize, bearer + single-flight refresh | ✅ |
 | `core/notification/notification.service.ts` | success/info/warn/error/problem | ✅ |
 | `core/utils/url.util.ts` | return URL, trusted API URL, safe external URL, join | ✅ |
@@ -446,3 +450,64 @@ i18n.t('dashboard.greeting', { name: displayName() })
   → FE2 ตอนทำ `core/utils/date.util.ts` ให้ format ด้วย `i18n.locale()` ซึ่งเป็น signal
   จะได้อัปเดตตามภาษาทันที **ห้ามใช้ `DatePipe`/`DecimalPipe` เปล่า ๆ กับข้อมูลที่ต้องเปลี่ยนตามภาษา**
 - ปี พ.ศ. ยังใช้ตามกฎเดิม (BR-HOL-010) แสดงเฉพาะตอนภาษาไทย
+
+---
+
+## 15. เรียก API + Spinner + Timeout
+
+### `ApiService` คือประตูเดียวที่คุยกับ HTTP
+
+**ห้าม inject `HttpClient` ตรง ๆ ใน feature** ทุก method (`get/getPaged/post/put/patch/delete`)
+เป็น wrapper บาง ๆ ของ `dispatch()` ตัวเดียว เพิ่มพฤติกรรมใหม่แก้ที่เดียวจบ
+
+```ts
+this.api.get<HolidayListItem[]>('/holidays', {
+  query: { page: 0, size: 20 },
+  timeoutMs: 60000,     // override เฉพาะคำขอนี้
+  skipLoading: true,    // ไม่ต้องหมุน spinner
+});
+```
+
+> ข้อยกเว้นเดียวที่ใช้ `HttpClient` ตรงได้คือ `auth.service.ts` เพราะต้องใช้ `withCredentials`
+> + CSRF header แบบเฉพาะทาง และต้องไม่ผ่าน envelope unwrap
+
+### Spinner — มี 2 ตัวกลาง แยกกันชัดเจน
+
+| Component | ใช้เมื่อไหร่ | พฤติกรรม |
+|---|---|---|
+| `<app-page-loading />` | ระดับหน้า (mount ไว้ที่ `app.ts` แล้ว 1 ตัว ไม่ต้องใส่ซ้ำ) | `position: fixed` เต็มจอ `z-index: 900` |
+| `<app-modal-loading />` | **ใน dialog เท่านั้น** วางเป็นลูกของ `p-dialog` | `position: absolute; inset: 0` `z-index: 10` |
+
+ทั้งคู่ใช้ `<app-spinner>` ตัวเดียวกัน (ครอบ `p-progress-spinner` ของ PrimeNG) สีมาจาก
+token `progressspinner.colorOne..Four` ใน `app-preset.ts` ที่ผูกกับ `{primary.*}` แล้ว — **ห้ามใส่สีเอง**
+
+**กฎเหล็กของ modal spinner:** ต้องอยู่ **ใน DOM ของ dialog** เพื่อให้อยู่ใน stacking context เดียวกัน
+PrimeNG ให้ z-index ของ dialog ที่ 1100+ แบบ dynamic (`config.zIndex.modal`) ถ้าใช้ `fixed` + z-index สูง
+มันจะไป**ทับ modal** หรือ**โดน modal ทับ** อย่างใดอย่างหนึ่งเสมอ การใช้ `absolute` ในกล่อง dialog
+ทำให้หมุนเฉพาะในกรอบ modal และเป็นไปไม่ได้ที่จะล้นออกนอก
+
+พอ `<app-modal-loading>` ถูก mount มันจะ `registerModal()` ให้อัตโนมัติ → `pageBusy` กลายเป็น false
+→ **page spinner จะไม่หมุนซ้อนนอก modal** และคืนค่าให้เองตอน destroy
+
+### `LoadingStore`
+
+นับเป็น **counter ไม่ใช่ boolean** เพราะยิงพร้อมกันหลายเส้น ถ้าใช้ boolean เส้นที่เสร็จก่อนจะดับ spinner
+ทั้งที่เส้นอื่นยังวิ่ง — ลด counter ใน `finalize()` จึงครอบทั้ง success / error / **cancel (unsubscribe)**
+
+### Timeout
+
+- ค่า default อ่านจาก `config.json` → `apiTimeoutMs` (30000) ปรับต่อ Environment ได้โดยไม่ต้อง build ใหม่
+- override รายคำขอผ่าน `timeoutMs` ของ `ApiService` หรือ `REQUEST_TIMEOUT_MS` context token
+- `TimeoutError` ถูกแปลงเป็น `ProblemDetail` code `TIMEOUT_ERROR` ทันทีที่ interceptor
+  → error contract เหมือนเดิมทั้งระบบ, `isNotifiableError` = true จึงขึ้น toast อัตโนมัติ
+
+### ลำดับ interceptor (สำคัญ ห้ามสลับมั่ว)
+
+```
+requestId → loading → error → auth → timeout → mock
+```
+
+- **loading อยู่นอก auth** → ตอน 401 แล้ว refresh + retry นับเป็นคำขอเดียว spinner ไม่กะพริบ
+- **timeout อยู่ใน auth** → คำขอเดิมกับ retry หลัง refresh ได้เวลาคนละก้อน
+  ถ้าเอาไว้นอก retry จะตายเพราะงบเวลาถูกใช้ไปกับคำขอแรกแล้ว
+- **error อยู่นอก auth** → toast เฉพาะ error ที่ผ่านการ refresh แล้วยังพัง ไม่เด้งตอน 401 ที่กู้ได้

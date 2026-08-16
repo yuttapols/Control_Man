@@ -106,3 +106,22 @@ body {
   font-size: 0.75rem;
   color: var(--p-primary-600);
 }
+
+.app-page-loading {
+  z-index: 900;
+}
+
+.app-modal-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: block;
+  pointer-events: auto;
+}
+
+.p-dialog:has(> .app-modal-loading),
+.p-dialog-content:has(> .app-modal-loading),
+.p-dialog:has(.app-modal-loading),
+.p-dialog-content:has(.app-modal-loading) {
+  position: relative;
+}
