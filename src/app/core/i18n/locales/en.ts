@@ -29,6 +29,9 @@ export const EN: Readonly<Record<TranslationKey, string>> = {
   'user.role': 'Role',
   'user.noRole': 'No role assigned',
   'user.logout': 'Sign out',
+  'user.logoutConfirmTitle': 'Confirm sign out',
+  'user.logoutConfirmMessage': 'Are you sure you want to sign out?',
+  'user.logoutCancel': 'Cancel',
 
   'env.aria': 'Current environment',
   'env.dev': 'DEV · Development',

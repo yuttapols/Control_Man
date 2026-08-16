@@ -10,7 +10,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
   imports: [Button],
   template: `
     <div
-      class="flex h-16 shrink-0 items-center gap-3 border-b border-surface-200 px-4"
+      class="flex h-18 shrink-0 items-center gap-3 border-b border-white/10 px-4"
       [class.justify-center]="compact()"
       [class.px-0]="compact()"
     >
@@ -23,8 +23,8 @@ import { I18nService } from '../../core/i18n/i18n.service';
 
       @if (!compact()) {
         <span class="flex min-w-0 flex-col leading-tight">
-          <span class="truncate text-sm font-bold text-surface-900">{{ appName() }}</span>
-          <span class="truncate text-xs text-surface-500">{{ i18n.t('layout.brandSubtitle') }}</span>
+          <span class="truncate text-sm font-bold text-white">{{ appName() }}</span>
+          <span class="truncate text-xs text-slate-400">{{ i18n.t('layout.brandSubtitle') }}</span>
         </span>
       }
 

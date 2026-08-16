@@ -4,17 +4,17 @@ import { Tooltip } from 'primeng/tooltip';
 
 import { AppConfigService } from '../../core/config/app-config.service';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { EnvironmentBadge } from '../../shared/components/environment-badge/environment-badge';
 import { LanguageSwitcher } from '../language-switcher/language-switcher';
 import { LayoutStore } from '../layout.store';
+import { UserMenu } from '../user-menu/user-menu';
 
 @Component({
   selector: 'app-topbar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Button, Tooltip, EnvironmentBadge, LanguageSwitcher],
+  imports: [Button, Tooltip, LanguageSwitcher, UserMenu],
   template: `
     <header
-      class="sticky top-0 z-30 flex h-16 items-center justify-between gap-2 border-b border-surface-200 bg-white/90 px-3 backdrop-blur sm:px-4"
+      class="sticky top-0 z-30 flex h-18 items-center justify-between gap-2 border-b border-surface-200 bg-white/95 px-3 shadow-sm backdrop-blur sm:px-5"
     >
       <div class="flex min-w-0 items-center gap-2">
         <p-button
@@ -32,29 +32,11 @@ import { LayoutStore } from '../layout.store';
         <span class="truncate text-base font-bold text-surface-900 lg:hidden">
           {{ appName() }}
         </span>
-
-        <span class="hidden lg:inline">
-          <app-environment-badge />
-        </span>
       </div>
 
       <div class="flex shrink-0 items-center gap-1 sm:gap-2">
-        <span class="lg:hidden">
-          <app-environment-badge [compact]="true" />
-        </span>
-
         <app-language-switcher />
-
-        <p-button
-          icon="pi pi-bell"
-          severity="secondary"
-          [text]="true"
-          [rounded]="true"
-          [disabled]="true"
-          [ariaLabel]="i18n.t('layout.notifications')"
-          [pTooltip]="i18n.t('layout.notificationsTooltip')"
-          tooltipPosition="bottom"
-        />
+        <app-user-menu />
       </div>
     </header>
   `,

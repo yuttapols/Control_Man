@@ -12,7 +12,6 @@ import { AppConfigService } from '../../core/config/app-config.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { TranslationKey } from '../../core/i18n/locales/th';
 import { DEFAULT_LANDING_URL, sanitizeReturnUrl } from '../../core/utils/url.util';
-import { EnvironmentBadge } from '../../shared/components/environment-badge/environment-badge';
 import { FormField, describedByIds } from '../../shared/components/form-field/form-field';
 import { ValidationSummary } from '../../shared/components/validation-summary/validation-summary';
 import { ProblemDetail } from '../../shared/models/api.model';
@@ -50,7 +49,6 @@ const BRAND_HIGHLIGHT_KEYS: readonly TranslationKey[] = [
     InputText,
     Message,
     Password,
-    EnvironmentBadge,
     FormField,
     ValidationSummary,
   ],
@@ -101,7 +99,6 @@ const BRAND_HIGHLIGHT_KEYS: readonly TranslationKey[] = [
             </span>
             <h1 class="text-xl font-bold text-surface-900">{{ appName() }}</h1>
             <p class="text-sm text-surface-500">{{ i18n.t('login.subtitle') }}</p>
-            <app-environment-badge />
           </div>
 
           <form class="flex flex-col gap-4" [formGroup]="form" (ngSubmit)="submit()" novalidate>

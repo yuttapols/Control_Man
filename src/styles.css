@@ -36,6 +36,24 @@ body {
   min-height: 2.5rem;
 }
 
+.p-select,
+.p-multiselect,
+.p-dropdown,
+.p-select-option:not(.p-disabled),
+.p-multiselect-option:not(.p-disabled),
+.p-menu-item:not(.p-disabled) .p-menu-item-link {
+  cursor: pointer;
+}
+
+.p-select.p-disabled,
+.p-multiselect.p-disabled,
+.p-dropdown.p-disabled,
+.p-select-option.p-disabled,
+.p-multiselect-option.p-disabled,
+.p-menu-item.p-disabled .p-menu-item-link {
+  cursor: not-allowed;
+}
+
 .app-sidebar-transition {
   transition: width 0.2s ease;
 }
@@ -105,6 +123,26 @@ body {
   padding-inline-start: 0.5rem;
   font-size: 0.75rem;
   color: var(--p-primary-600);
+}
+
+.app-user-menu-logout .p-menu-item-link,
+.app-user-menu-logout .p-menu-item-icon {
+  color: var(--p-red-600);
+}
+
+.app-user-menu-logout,
+.app-user-menu-logout .p-menu-item-content,
+.app-user-menu-logout .p-menu-item-link {
+  width: 100%;
+}
+
+.app-user-menu-logout .p-menu-item-link {
+  min-height: 2.75rem;
+  padding-inline: 1rem;
+}
+
+.app-user-menu-logout .p-menu-item-content:hover {
+  background: var(--p-red-50);
 }
 
 .app-page-loading {

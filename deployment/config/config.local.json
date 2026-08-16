@@ -1,0 +1,7 @@
+{
+  "appName": "Thai Holiday Control",
+  "environment": "DEV",
+  "apiBaseUrl": "http://localhost:8080/api/v1/portal",
+  "useMockApi": false,
+  "apiTimeoutMs": 30000
+}

@@ -27,6 +27,9 @@ export const TH = {
   'user.role': 'บทบาท',
   'user.noRole': 'ไม่มีบทบาท',
   'user.logout': 'ออกจากระบบ',
+  'user.logoutConfirmTitle': 'ยืนยันการออกจากระบบ',
+  'user.logoutConfirmMessage': 'คุณต้องการออกจากระบบใช่หรือไม่',
+  'user.logoutCancel': 'ยกเลิก',
 
   'env.aria': 'สภาพแวดล้อมปัจจุบัน',
   'env.dev': 'DEV · ระบบพัฒนา',

@@ -9,6 +9,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { TranslationKey } from '../../core/i18n/locales/th';
 
 export const BREADCRUMB_DATA_KEY = 'breadcrumb';
+export const BREADCRUMB_ICON_DATA_KEY = 'breadcrumbIcon';
 
 @Component({
   selector: 'app-breadcrumb',
@@ -62,7 +63,8 @@ function buildTrail(
     const labelKey = current.data[BREADCRUMB_DATA_KEY] as TranslationKey | undefined;
 
     if (labelKey) {
-      trail.push({ label: translate(labelKey), routerLink: `/${segments.join('/')}` });
+      const icon = current.data[BREADCRUMB_ICON_DATA_KEY] as string | undefined;
+      trail.push({ label: translate(labelKey), icon, routerLink: `/${segments.join('/')}` });
     }
 
     current = current.firstChild;

@@ -17,9 +17,9 @@ import { Topbar } from '../topbar/topbar';
     '(document:keydown.escape)': 'closeDrawer()',
   },
   template: `
-    <div class="flex min-h-screen bg-surface-50">
+    <div class="flex min-h-screen bg-slate-100">
       <aside
-        class="app-sidebar-transition hidden shrink-0 flex-col border-r border-surface-200 bg-white lg:flex"
+        class="app-sidebar-transition hidden shrink-0 flex-col bg-slate-950 text-slate-200 shadow-xl lg:flex"
         [class.w-64]="expanded()"
         [class.w-18]="!expanded()"
       >
@@ -36,7 +36,7 @@ import { Topbar } from '../topbar/topbar';
             (click)="closeDrawer()"
           ></button>
           <aside
-            class="app-drawer-enter absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col border-r border-surface-200 bg-white shadow-xl"
+            class="app-drawer-enter absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col bg-slate-950 text-slate-200 shadow-xl"
             cdkTrapFocus
             [cdkTrapFocusAutoCapture]="true"
           >
@@ -49,8 +49,8 @@ import { Topbar } from '../topbar/topbar';
       <div class="flex min-w-0 flex-1 flex-col">
         <app-topbar />
 
-        <main class="flex-1 px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
-          <div class="mx-auto flex w-full max-w-7xl flex-col gap-4">
+        <main class="flex-1 px-4 py-4 sm:px-6 lg:px-7 lg:py-6">
+          <div class="mx-auto flex w-full max-w-[100rem] flex-col gap-3">
             <app-breadcrumb />
             <router-outlet />
           </div>

@@ -13,7 +13,7 @@ export const APP_CONFIG_URL = 'config/config.json';
 export const FALLBACK_APP_CONFIG: AppConfig = {
   appName: 'Thai Holiday Control',
   environment: 'DEV',
-  apiBaseUrl: '/api/v1/portal',
+  apiBaseUrl: 'http://localhost:8080/api/v1/portal',
   useMockApi: false,
   apiTimeoutMs: 30000,
 };

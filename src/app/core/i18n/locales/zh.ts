@@ -29,6 +29,9 @@ export const ZH: Readonly<Record<TranslationKey, string>> = {
   'user.role': '角色',
   'user.noRole': '未分配角色',
   'user.logout': '退出登录',
+  'user.logoutConfirmTitle': '确认退出',
+  'user.logoutConfirmMessage': '确定要退出登录吗？',
+  'user.logoutCancel': '取消',
 
   'env.aria': '当前环境',
   'env.dev': 'DEV · 开发环境',

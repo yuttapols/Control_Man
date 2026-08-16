@@ -3,22 +3,22 @@ import { RouterLink } from '@angular/router';
 import { Button } from 'primeng/button';
 
 import { I18nService } from '../../core/i18n/i18n.service';
-import { PageState } from '../../shared/components/page-state/page-state';
+import { ErrorPageView } from './error-page-view';
 
 @Component({
   selector: 'app-forbidden-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, Button, PageState],
+  imports: [RouterLink, Button, ErrorPageView],
   template: `
-    <app-page-state
-      status="forbidden"
+    <app-error-page-view
+      code="403"
+      icon="pi-lock"
+      tone="forbidden"
       [title]="i18n.t('page.forbiddenTitle')"
       [description]="i18n.t('page.forbiddenDescription')"
-    />
-
-    <div class="flex justify-center">
+    >
       <p-button [label]="i18n.t('page.backHome')" icon="pi pi-home" routerLink="/dashboard" />
-    </div>
+    </app-error-page-view>
   `,
 })
 export class ForbiddenPage {

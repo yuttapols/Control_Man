@@ -10,6 +10,7 @@ export interface NavItem {
 
 export interface NavSection {
   titleKey: TranslationKey | null;
+  icon?: string;
   items: readonly NavItem[];
 }
 
@@ -27,6 +28,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
   },
   {
     titleKey: 'nav.section.holidayData',
+    icon: 'pi pi-calendar-clock',
     items: [
       {
         labelKey: 'nav.calendar',
@@ -44,6 +46,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
   },
   {
     titleKey: 'nav.section.approval',
+    icon: 'pi pi-verified',
     items: [
       {
         labelKey: 'nav.approvals',
@@ -61,6 +64,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
   },
   {
     titleKey: 'nav.section.administration',
+    icon: 'pi pi-shield',
     items: [
       {
         labelKey: 'nav.apiConsumers',

@@ -13,7 +13,7 @@ import { AppLanguage, LANGUAGE_OPTIONS, flagClassOf } from '../../core/i18n/lang
   template: `
     <button
       type="button"
-      class="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-sm font-medium text-surface-700 transition-colors hover:bg-surface-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
+      class="flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1.5 text-sm font-medium text-surface-700 transition-colors hover:bg-surface-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
       aria-haspopup="true"
       aria-controls="language-menu"
       [attr.aria-label]="i18n.t('layout.languageTooltip')"
