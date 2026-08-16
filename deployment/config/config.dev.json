@@ -1,0 +1,7 @@
+{
+  "appName": "Thai Holiday Control",
+  "environment": "DEV",
+  "apiBaseUrl": "https://control-man-backend.onrender.com/api/v1/portal",
+  "useMockApi": false,
+  "apiTimeoutMs": 60000
+}
