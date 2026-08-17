@@ -12,7 +12,7 @@ import { ApiResponse } from '../../shared/models/api.model';
 import { AuthSession } from '../../core/auth/auth.model';
 import { LoginPage } from './login-page';
 
-const LOGIN_URL = '/api/v1/portal/auth/login';
+const LOGIN_URL = 'http://localhost:8080/api/v1/portal/auth/login';
 
 const successResponse: ApiResponse<AuthSession> = {
   data: {

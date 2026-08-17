@@ -8,9 +8,10 @@ import { AuthSession } from './auth.model';
 import { AuthService } from './auth.service';
 import { AuthStore } from './auth.store';
 
-const REFRESH_URL = '/api/v1/portal/auth/refresh';
-const LOGIN_URL = '/api/v1/portal/auth/login';
-const LOGOUT_URL = '/api/v1/portal/auth/logout';
+const API_BASE_URL = 'http://localhost:8080/api/v1/portal';
+const REFRESH_URL = `${API_BASE_URL}/auth/refresh`;
+const LOGIN_URL = `${API_BASE_URL}/auth/login`;
+const LOGOUT_URL = `${API_BASE_URL}/auth/logout`;
 
 function sessionResponse(accessToken: string): ApiResponse<AuthSession> {
   return {

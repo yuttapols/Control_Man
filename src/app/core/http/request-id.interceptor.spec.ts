@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { REQUEST_ID_HEADER, createRequestId, requestIdInterceptor } from './request-id.interceptor';
 
-const PORTAL_URL = '/api/v1/portal/holidays';
+const PORTAL_URL = 'http://localhost:8080/api/v1/portal/holidays';
 const EXTERNAL_URL = 'https://third-party.example/data';
 
 const BACKEND_ALLOWED_HEADERS = ['Authorization', 'Content-Type', 'X-Request-ID', 'X-CSRF-Token'];

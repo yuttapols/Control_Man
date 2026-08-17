@@ -9,11 +9,12 @@ import { AuthService } from '../auth/auth.service';
 import { AuthStore } from '../auth/auth.store';
 import { authInterceptor } from './auth.interceptor';
 
-const PORTAL_URL = '/api/v1/portal/holidays';
-const OTHER_PORTAL_URL = '/api/v1/portal/users';
-const LOGIN_URL = '/api/v1/portal/auth/login';
-const REFRESH_URL = '/api/v1/portal/auth/refresh';
-const LOGOUT_URL = '/api/v1/portal/auth/logout';
+const API_BASE_URL = 'http://localhost:8080/api/v1/portal';
+const PORTAL_URL = `${API_BASE_URL}/holidays`;
+const OTHER_PORTAL_URL = `${API_BASE_URL}/users`;
+const LOGIN_URL = `${API_BASE_URL}/auth/login`;
+const REFRESH_URL = `${API_BASE_URL}/auth/refresh`;
+const LOGOUT_URL = `${API_BASE_URL}/auth/logout`;
 const EXTERNAL_URL = 'https://third-party.example/data';
 
 const session: AuthSession = {
